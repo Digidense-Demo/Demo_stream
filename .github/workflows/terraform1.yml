@@ -25,6 +25,9 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
+      - name: Check Terraform Formatting
+        run: terraform fmt -check
+      
       - name: Assume AWS Role
         id: assume-role
         uses: aws-actions/configure-aws-credentials@v1
