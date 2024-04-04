@@ -26,16 +26,23 @@ jobs:
         run: terraform init
 
       - name: Check Terraform Formatting
-        run: terraform fmt -check
+        run: |
+          terraform fmt -check
+          if [ $? -ne 0 ]; then
+            echo "Terraform formatting issues found."
+            exit 1
+          else
+            echo "Terraform formatting check passed."
+          fi
       
       - name: Assume AWS Role
         id: assume-role
         uses: aws-actions/configure-aws-credentials@v1
         with:
-           role-to-assume: arn:aws:iam::738322481337:role/git-access
-           aws-region: us-east-1
-           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: arn:aws:iam::738322481337:role/git-access
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
          
       - name: Terraform Plan
         run: terraform plan -out=tfplan
