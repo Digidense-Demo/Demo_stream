@@ -1,4 +1,3 @@
-
 variable "description" {
   type        = string
   description = "The description for the KMS key"
