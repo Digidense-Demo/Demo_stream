@@ -1,4 +1,4 @@
-name: Terraform Workflow demo
+name: snyk
 
 on:
   push:
@@ -22,16 +22,34 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version:  ${{ env.TF_VERSION }}
+          terraform_version: ${{ env.TF_VERSION }}
 
       - name: Configure AWS credentials
         run: |
+          echo "AWS_IAM_ROLE_TO_ASSUME=${{ secrets.AWS_IAM_ROLE_TO_ASSUME }}" >> $GITHUB_ENV
           echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> $GITHUB_ENV
           echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> $GITHUB_ENV
 
       - name: Terraform Init
         run: terraform init
 
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive 
+      
+  snyk_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Snyk test
+        uses: snyk/actions@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: test        
+      
       - name: Terraform Plan
         run: terraform plan -out=tfplan
 
